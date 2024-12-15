@@ -8,7 +8,7 @@ COPY ./config /model_config
 ENV MODEL_NAME=diabetes-classification-model
 ENV MODEL_BASE_PATH=/models
 ENV MONITORING_CONFIG="/model_config/prometheus.config"
-ENV PORT=8080
+ENV PORT=8501
 
 # Create the entrypoint script to run TensorFlow Serving with the correct config
 RUN echo '#!/bin/bash \n\n\
