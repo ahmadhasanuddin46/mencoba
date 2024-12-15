@@ -1,36 +1,17 @@
-from flask import Flask, render_template, request, jsonify
-from prediction_service import prediction
-import os
+from flask import Flask, request, jsonify
+import tensorflow as tf
 
-webapp_root = "webapp"
+app = Flask(__name__)
 
-static_dir = os.path.join(webapp_root, "static")
-template_dir = os.path.join(webapp_root, "templates")
+# Misalnya, load model
+model = tf.keras.models.load_model('path_to_model/diabetes_classification_model.h5')
 
-app = Flask(__name__, static_folder=static_dir,template_folder=template_dir)
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.get_json()  # Ambil data dari request POST
+    prediction = model.predict(data["input"])  # Lakukan prediksi
+    return jsonify({"prediction": prediction.tolist()})
 
-
-@app.route("/", methods=["GET", "POST"])
-def index():
-
-    if request.method == "POST":
-        try:
-            if request.form:    #if request is coming from the webapp
-                dict_req = dict(request.form)
-                response = prediction.form_response(dict_req)
-                return render_template("index.html", response=response)
-            
-            elif request.json:  #if request is from any api testing app
-                response = prediction.api_response(request.json)
-                return jsonify(response)
-
-        except Exception as e:
-            # error = {"error":e}
-            error = e
-            return render_template("404.html", error=error)
-    else:
-        return render_template("index.html")
-
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=4050, debug=True)
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 8080))  # Port dari Railway
+    app.run(host="0.0.0.0", port=port)
